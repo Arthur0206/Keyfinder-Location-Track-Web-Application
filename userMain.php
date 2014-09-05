@@ -1,3 +1,8 @@
+<?php
+include "connection.php";
+include "algor.php";
+?>
+
 <!doctype html>
 <html lang="en">
    <head>
@@ -32,7 +37,15 @@
     <body style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
 		<header class="dark">
 			<div class="container_16">
-				<h1>Sprintron Location Service</h1>
+				<h1 style='float: left; padding-top: 3px'>Sprintron Location Service</h1>
+				<?php
+				if ($logged == true) {
+				?>
+				<a href='./logout.php' style='float: right; font: 20px/20px "Arial"; padding: 7px 24px 0px 0px; color: #FFFFFF'>Logout</a>
+                <li style='float: right; color: #527fc2; font: bold 20px/20px "Arial"; padding: 8px 24px 0px 0px'> <?php echo $user['Username']; ?> </li>
+				<?php
+				}
+				?>
 			</div>
 		</header>
 		
