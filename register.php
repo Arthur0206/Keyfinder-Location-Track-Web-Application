@@ -24,7 +24,15 @@ if (isset($_POST['register'])) {
 		mysql_query("INSERT INTO `user` (`Username`, `Password`, `Email`, `Salt`) VALUES ('$username', '$password', '$email', '$salt')");
 		setcookie("c_user", hash("sha512", $username), time() + 24 * 60 * 60, "/");
 		setcookie("c_salt", $salt, time() + 24 * 60 * 60, "/");
-		die("Your account has been created and you are now loggeed in.");
+		
+		// add a json file which stores the device list of the user
+		mkdir("users/".$_POST['username']);
+		$newFile = "users/".$_POST['username']."/dev_list.txt";
+		fopen($newFile, 'w') or die("can't open file");
+		// Read and write for owner, read for everybody else
+		chmod("users/".$_POST['username']."/dev_list.txt", 0644);
+		
+        header("Location: ./userMain.php");
 	}
 }
 ?>

@@ -1,0 +1,5 @@
+postDevData.php - devid already exist for add new device operation: tester3 tester3 13 0 1    
+create users/tester3/15 in checkAndCreateFile(): tester3 tester3 15 0 132    
+postDevData.php - devid already exist for add new device operation: tester3 tester3 15 0 132    
+create users/tester3/17 in checkAndCreateFile(): tester3 tester3 17 0 2    
+postDevData.php - devid already exist for add new device operation: tester3 tester3 17 0 2    
