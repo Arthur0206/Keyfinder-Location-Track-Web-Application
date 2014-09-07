@@ -9,6 +9,13 @@ function logSysErrMsg($msg) {
 	file_put_contents('syslog/error.txt', $error_msg, FILE_APPEND);
 }
 
+function clearPostRedirectDie() {
+	// clear $_POST, redirect and die
+	unset($_POST);
+    header("Location: ./postDevData.php");
+	die;
+}
+
 function isValidDateTime($dateTime)
 {
     if (preg_match("/^(\d{4})-(\d{2})-(\d{2}) ([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/", $dateTime, $matches)) {
@@ -43,16 +50,12 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 	// check user name
 	if ($user == '0') {
 		logSysErrMsg("postDevData.php - username doesn't exist");
-		unset($_POST);
-        header("Location: ./postDevData.php");
-		die;
+		clearPostRedirectDie();
 	}
 	// check password
 	if ($user['Password'] != $password) {
 		logSysErrMsg("postDevData.php - incorrect password");
-		unset($_POST);
-        header("Location: ./postDevData.php");
-		die;
+		clearPostRedirectDie();
 	}
 	
     // if form fields are empty, outputs message, else, gets their data
@@ -62,9 +65,7 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 		// if missing devtype input
 		if ($_POST['devtype'] == '') {
 			logSysErrMsg("postDevData.php - missing devtype for add device operation");
-			unset($_POST);
-			header("Location: ./postDevData.php");
-			die;
+			clearPostRedirectDie();
 		}
 		
 		// create dir users/tester/140aaab0a9 for new device
@@ -83,18 +84,17 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 		for($i = 0, $size = count($arr_data); $i < $size; ++$i) {
 			if ($arr_data[$i]['devid'] == $_POST['devid']) {
 				logSysErrMsg("postDevData.php - devid already exist for add new device operation");
-				unset($_POST);
-				header("Location: ./postDevData.php");
-				die;
+				clearPostRedirectDie();
 			}
 		}
 		
 		// add a line for the new device to the dev_list.txt jason file
+		$now = date("Y-m-d H:i:s"); 
 		$formdata = array(
 			'devid'=> $_POST['devid'],
 			'devtype'=> $_POST['devtype'],
 			'devdescript'=> $_POST['devdescript'],
-			'lastdate'=> '',
+			'lasttime'=> $now,
 		);
 		// appends the array with new form data
 		$arr_data[] = $formdata;
@@ -107,9 +107,7 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 		} else {
 			// outputs error message if data cannot be saved
 			logSysErrMsg("postDevData.php - can't add new dev to dev_list.txt");
-			unset($_POST);
-			header("Location: ./postDevData.php");
-			die;
+			clearPostRedirectDie();
 		}
     } else if ($_POST['opcode'] == '1') {
 		// add location data operation
@@ -117,58 +115,63 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 		// if missing longtitude/latitude/datetime input
 		if (!isset($_POST['longtitude']) || !isset($_POST['latitude']) || !isset($_POST['datetime'])) {
 			logSysErrMsg("postDevData.php - no longtitude/latitude/datetime for adding location data");
-			unset($_POST);
-			header("Location: ./postDevData.php");
-			die;
+			clearPostRedirectDie();
 		}
 		// if invalid datetime
 		if (!isValidDateTime($_POST['datetime'])) {
 			logSysErrMsg("postDevData.php - invalid datetime");
-			unset($_POST);
-			header("Location: ./postDevData.php");
-			die;
+			clearPostRedirectDie();
 		}
 		
 		// gets json-data from dev_list.txt file and check if device id is in there
-		$arr_data = array(); 
+		$arr_data = array();
 		$jsondata = file_get_contents("users/".$_POST['username'].'/'."dev_list.txt");
 		$arr_data = json_decode($jsondata, true);
-		$i = 0, $size = count($arr_data), $devtype = 0, $lastdate = '';
-		for(; $i < $size; ++$i) {
+		$idx = 0; $size = count($arr_data); $devtype = 0; $lasttime = '';
+		for($i = 0; $i < $size; ++$i) {
 			if ($arr_data[$i]['devid'] == $_POST['devid']) {
 				$devtype = $arr_data[$i]['devtype'];
-				$lastdate = $arr_data[$i]['lastdate'];
+				$lasttime = $arr_data[$i]['lasttime'];
+				$idx = $i;
 			}
 		}
 		// if device not exist or device type is not keyfinder
-		if ($i == $size || $devtype != 0) {
+		if ($idx == $size || $devtype != 0) {
 			logSysErrMsg("postDevData.php - device not exist or dev type is not keyfinder");
-			unset($_POST);
-			header("Location: ./postDevData.php");
-			die;
+			clearPostRedirectDie();
 		}
-		// if dir doesn't exist, create dir users/tester/140aaab0a9 for new device
-		checkAndCreateFile("users/".$_POST['username']."/".$_POST['devid'], null);
-/*
-		$line = 
-		file_put_contents("users/$_POST['username']"."/".$image, $contents_data);
 
-        // adds form data into an array
-        $formdata = array(
-            'youname'=> $_POST['youname'],
-            'youemail'=> $_POST['youemail'],
-            'studies'=> $_POST['studies'],
-            'civilstate'=> $_POST['civilstate']
-        );
-        
-        // encodes the array into a string in JSON format (JSON_PRETTY_PRINT - uses whitespace in json-string, for human readable)
-        $jsondata = json_encode($formdata, JSON_PRETTY_PRINT);
-        
-        // saves the json string in "formdata.txt" (in "dirdata" folder)
-        // outputs error message if data cannot be saved
-        if(file_put_contents('dirdata/formdata.txt', $jsondata)) echo 'Data successfully saved';
-        else echo 'Unable to save data in "dirdata/formdata.txt"';
-*/
+		$devid_path = "users/".$_POST['username']."/".$_POST['devid'];
+		// if dir doesn't exist, create dir users/username/deviceID for new device
+		checkAndCreateFile($devid_path, null);
+
+		// check if $_POST['datetime'] is bigger than lasttime and smaller than tomorrow (today + 86400 sec)
+		// theoretically datetime shouldn't be larger than now, but currently we allow 1 day time shift (due to smart phone's inaccurate time setting)
+		$now = date("Y-m-d H:i:s");
+		if (strtotime($_POST['datetime']) < strtotime($lasttime) || strtotime($_POST['datetime']) > strtotime($now) + 86400) {
+			logSysErrMsg("postDevData.php - datetime smaller than lasttime or bigger than tomorrow (now + 86400 sec)");
+			clearPostRedirectDie();
+		}
+
+		// open or create the file of the day corresponding to $_POST['datetime']
+		$date_and_time = explode(" ", $_POST['datetime']);
+		checkAndCreateFile($devid_path, $date_and_time[0].'.txt');
+		// append the current longtitude/latitude/datetime to the last line
+		file_put_contents($devid_path."/".$date_and_time[0].'.txt', $_POST['longtitude'].' '.$_POST['latitude'].' '.$_POST['datetime']."\n", FILE_APPEND);
+		
+		// update lasttime in dev_list.txt
+		$arr_data[$idx]['lasttime'] = $_POST['datetime'];
+		// encodes the array into a string in JSON format, and saves the json string in "dev_list.txt"
+		$jsondata = json_encode($arr_data, JSON_PRETTY_PRINT);
+		if (file_put_contents("users/".$_POST['username']."/dev_list.txt", $jsondata)) {
+			echo 'Data successfully saved';
+		} else {
+			// outputs error message if data cannot be saved
+			logSysErrMsg("postDevData.php - can't add new dev to dev_list.txt");
+			clearPostRedirectDie();
+		}
+		
+		// in the future, we might want to remove a file if it is already 365 ago 
     }
 }
 ?>
@@ -176,15 +179,15 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 	<form action='' method='post'>
-		<b>*username:</b><input type="text" name="username"/>
-		<b>*password:</b><input type="password" name="password"/>
-		<b>*device id:</b><input type="text" name="devid"/>
-		<b>*opcode:</b><input type="text" name="opcode"/>               <!-- 0: add device, 1: location service-->
-		<b>device type:</b><input type="text" name="devtype"/>
-		<b>device description:</b><input type="text" name="devdescript"/>
-		<b>longtitude:</b><input type="text" name="longtitude"/>
-		<b>latitude:</b><input type="text" name="latitude"/>
-		<b>datetime:</b><input type="text" name="datetime"/>
-		<input type='submit' value='Post Device Data' name='postDevData' />
+		<div><b>*username:</b><input type="text" name="username"/></div>
+		<div><b>*password:</b><input type="password" name="password"/></div>
+		<div><b>*device id:</b><input type="text" name="devid"/></div>
+		<div><b>*opcode:</b><input type="text" name="opcode"/></div>            <!-- 0: add device, 1: location service-->
+		<div><b>device type:</b><input type="text" name="devtype"/></div>
+		<div><b>device description:</b><input type="text" name="devdescript"/></div>
+		<div><b>longtitude:</b><input type="text" name="longtitude"/></div>
+		<div><b>latitude:</b><input type="text" name="latitude"/></div>
+		<div><b>datetime:</b><input type="text" name="datetime"/></div>
+		<div><input type='submit' value='Post Device Data' name='postDevData' /></div>
 	</form>
 </html>
