@@ -5,7 +5,7 @@ error_reporting(0);
 function logSysErrMsg($msg) {
 	// print error message and _POST[] to syslog/error.txt
 	$error_msg = $msg.': '.$_POST['username'].' '.$_POST['password'].' '.$_POST['devid']
-	.' '.$_POST['opcode'].' '.$_POST['devtype'].' '.$_POST['longtitude'].' '.$_POST['latitude'].' '.$_POST['date'].' '.$_POST['time']."\n";
+	.' '.$_POST['opcode'].' '.$_POST['devtype'].' '.$_POST['latitude'].' '.$_POST['longtitude'].' '.$_POST['datetime']."\n";
 	file_put_contents('syslog/error.txt', $error_msg, FILE_APPEND);
 }
 
@@ -112,9 +112,9 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
     } else if ($_POST['opcode'] == '1') {
 		// add location data operation
 		
-		// if missing longtitude/latitude/datetime input
-		if (!isset($_POST['longtitude']) || !isset($_POST['latitude']) || !isset($_POST['datetime'])) {
-			logSysErrMsg("postDevData.php - no longtitude/latitude/datetime for adding location data");
+		// if missing latitude/longtitude/datetime input
+		if (!isset($_POST['latitude']) || !isset($_POST['longtitude']) || !isset($_POST['datetime'])) {
+			logSysErrMsg("postDevData.php - no latitude/longtitude/datetime for adding location data");
 			clearPostRedirectDie();
 		}
 		// if invalid datetime
@@ -156,8 +156,8 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 		// open or create the file of the day corresponding to $_POST['datetime']
 		$date_and_time = explode(" ", $_POST['datetime']);
 		checkAndCreateFile($devid_path, $date_and_time[0].'.txt');
-		// append the current longtitude/latitude/datetime to the last line
-		file_put_contents($devid_path."/".$date_and_time[0].'.txt', $_POST['longtitude'].' '.$_POST['latitude'].' '.$_POST['datetime']."\n", FILE_APPEND);
+		// append the current latitude/longtitude/datetime to the last line
+		file_put_contents($devid_path."/".$date_and_time[0].'.txt', $_POST['latitude'].' '.$_POST['longtitude'].' '.$_POST['datetime']."\n", FILE_APPEND);
 		
 		// update lasttime in dev_list.txt
 		$arr_data[$idx]['lasttime'] = $_POST['datetime'];
@@ -185,8 +185,8 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 		<div><b>*opcode:</b><input type="text" name="opcode"/></div>            <!-- 0: add device, 1: location service-->
 		<div><b>device type:</b><input type="text" name="devtype"/></div>
 		<div><b>device description:</b><input type="text" name="devdescript"/></div>
-		<div><b>longtitude:</b><input type="text" name="longtitude"/></div>
 		<div><b>latitude:</b><input type="text" name="latitude"/></div>
+		<div><b>longtitude:</b><input type="text" name="longtitude"/></div>
 		<div><b>datetime:</b><input type="text" name="datetime"/></div>
 		<div><input type='submit' value='Post Device Data' name='postDevData' /></div>
 	</form>

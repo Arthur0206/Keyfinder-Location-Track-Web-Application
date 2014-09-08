@@ -1,6 +1,11 @@
 <?php
 include "connection.php";
 include "algor.php";
+
+// later on should parse dev_list.txt to set the 1st dev as default, and change according to get method (when user select a specific device)
+$selectedDevID = "1"; 
+// later on should parse dev_list.txt to set the last day as default, and change according to get method (when user select a specific date)
+$selectedDate = "2014-06-15";
 ?>
 
 <!doctype html>
@@ -32,7 +37,6 @@ include "algor.php";
 			.pagination .back-btn { background:url("images/arrow_left_12x12.png") no-repeat 50% 50%; border-right: 1px solid #ccc; }
 			.pagination .fwd-btn { background:url("images/arrow_right_12x12.png") no-repeat 50% 50%; border-left: 1px solid #ccc; }
 		</style>
-
 		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
 		<script type="text/javascript" src="js/jquery-1.7.1/jquery.min.js"></script>
 		<script type="text/javascript" src="js/underscore-1.2.2/underscore.min.js"></script>
@@ -41,26 +45,37 @@ include "algor.php";
 		<script type="text/javascript" src="js/demo.js"></script>
 		<script type="text/javascript" src="ui/jquery.ui.map.js"></script>
 		<script type="text/javascript" src="js/modernizr-2.0.6/modernizr.min.js"></script>
+
+		<!-- jquery for datepicker -->
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+		<script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+		<!-- jquery for datepicker -->
+		
 		<script type="text/javascript">
             $(function() { 
+				// show gmap
 				demo.add(function() {
 					$('#map_canvas').gmap({'disableDefaultUI':true, 'callback': function() {
 						var self = this;
 						$("[data-gmapping]").each(function(i,el) {
 							var data = $(el).data('gmapping');
-							self.addMarker({'id': data.id, 'tags':data.tags, 'position': new google.maps.LatLng(data.latlng.lat, data.latlng.lng), 'bounds':true }, function(map,marker) {
+							self.addMarker({'id': data.id, 'position': new google.maps.LatLng(data.latlng.lat, data.latlng.lng), 'bounds':true, 'icon': "images/small-red.png" }, function(map,marker) {
 								$(el).click(function() {
 									$(marker).triggerEvent('click');
 								});
 							}).click(function() {
-								self.openInfoWindow({ 'content': /*$(el).find('.info-box').text()*/ data.time }, this);
+								self.openInfoWindow({ 'content': data.descript }, this);
 							});
 						});						
 					}});
 				}).load();
+				
+				// show date picker
+			    $("#datepicker").datepicker();
 			});
         </script>
     </head>
+
     <body style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
 		<header class="dark">
 			<div class="container_16">
@@ -75,29 +90,35 @@ include "algor.php";
 				?>
 			</div>
 		</header>
-		
+
 		<div class="container_16">
 			<article class="grid_16">
+			<div id="datepicker"></div>
 				<div class="item rounded dark">
 					<div id="map_canvas" class="map rounded"></div>
 				</div>
-
 				<ul style="visibility:hidden">
-					<li data-gmapping='{"id":"m_1","latlng":{"lat":27.6648274,"lng":-81.51575350000002},"tags":"drupal","time":"Feb 11 2012"}'>
-						<p class="info-box">Florida DrupalCamp - Feb 11 2012</p>
-					</li>
-					<li data-gmapping='{"id":"m_2","latlng":{"lat":1.352083,"lng":103.81983600000001},"tags":"drupal","time":"Feb 11 2012"}'>
-						<p class="info-box">DrupalCamp Singapore - Mar 03 2012</p>					
-					</li>
-					<li data-gmapping='{"id":"m_3","latlng":{"lat":39.7391536,"lng":-104.9847034},"tags":"drupal","time":"Feb 11 2012"}'>
-						<p class="info-box">DrupalCon 2012 Denver - Mar 20 2012</p>				
-					</li>
-					<li data-gmapping='{"id":"m_4","latlng":{"lat":36.1658899,"lng":-86.7844432},"tags":"drupal","time":"Feb 11 2012"}'>
-						<p class="info-box">DrupalCamp Nashville - Apr 28 2012</p>				
-					</li>
-					<li data-gmapping='{"id":"m_5","latlng":{"lat":55.6760968,"lng":12.568337100000008},"tags":"drupal","time":"Feb 11 2012"}'>
-						<p class="info-box">DrupalCamp Copenhagen 5.0 - May 11 2012</p>				
-					</li>
+					<?php
+						$handle = fopen("users/".$user['Username'].'/'.$selectedDevID.'/'.$selectedDate.'.txt', "r");
+						$line_cnt = 0;
+						if ($handle) {
+							while (($line = fgets($handle)) !== false) {
+								// process the line read.
+								$line = trim($line);
+								$lat_lng_time = explode(" ", $line);
+								$descript = '日期:'.$lat_lng_time[2].' 時間:'.$lat_lng_time[3];
+								echo "<li data-gmapping='{\"id\":\"m_".$line_cnt."\",\"latlng\":{\"lat\":".$lat_lng_time[0].",\"lng\":".$lat_lng_time[1]
+								."},\"descript\":\"".$descript."\"}'></li>";
+								$line_cnt++;
+							}
+							if ($line_cnt == 0) {
+								echo "<h1> Fail to open file</h1>";
+							}
+						} else {
+							echo "<h1> Fail to open file</h1>";
+						}
+						fclose($handle);
+					?>
 				</ul>
 			</article>
 		</div>
