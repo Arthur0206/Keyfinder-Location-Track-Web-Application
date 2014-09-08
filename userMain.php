@@ -90,10 +90,9 @@ $selectedDate = "2014-06-15";
 				?>
 			</div>
 		</header>
-
-		<div class="container_16">
+		<div style="float:left;width:25%"><h1 style="margin-left:60px;margin-top:40px">TEST</h1></div>
+		<div class="container_16" style="float:left">
 			<article class="grid_16">
-			<div id="datepicker"></div>
 				<div class="item rounded dark">
 					<div id="map_canvas" class="map rounded"></div>
 				</div>
@@ -122,5 +121,6 @@ $selectedDate = "2014-06-15";
 				</ul>
 			</article>
 		</div>
+		<div id="datepicker" style="float:right;width:18%;margin-top:40px"></div>
 	</body>
 </html>
