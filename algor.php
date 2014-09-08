@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 $logged = false;
 if ($_COOKIE['c_user'] && $_COOKIE['c_salt']) {
 	$cuser = mysql_real_escape_string($_COOKIE['c_user']);

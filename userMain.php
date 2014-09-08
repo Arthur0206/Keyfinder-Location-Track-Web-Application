@@ -77,50 +77,57 @@ $selectedDate = "2014-06-15";
     </head>
 
     <body style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
-		<header class="dark">
-			<div class="container_16">
-				<h1 style='float: left; padding-top: 3px'>Sprintron Location Service</h1>
+		<header class="dark" style="min-width:960px">
+			<div id="header_main" style="margin-left:25%">
+				<h1 style='float:left;padding-top:3px'>Sprintron Location Service</h1>
+				<!-- add a left padder -->
+				<div style="float:right;width:33%;min-width:200px;height:30px"></div>
 				<?php
 				if ($logged == true) {
-				?>
-				<a href='./logout.php' style='float: right; font: 20px/20px "Arial"; padding: 7px 24px 0px 0px; color: #FFFFFF'>Logout</a>
-                <li style='float: right; color: #527fc2; font: bold 20px/20px "Arial"; padding: 8px 24px 0px 0px'> <?php echo $user['Username']; ?> </li>
+				?>									
+					<a href='./logout.php' style='float:right;font:20px/20px "Arial";padding:7px 24px 0px 0px;color:#FFFFFF'>Logout</a>
+					<li style='float:right;color:#527fc2;font: bold 20px/20px "Arial";padding:8px 24px 0px 0px'> <?php echo $user['Username']; ?> </li>
+
 				<?php
 				}
 				?>
 			</div>
 		</header>
-		<div style="float:left;width:25%"><h1 style="margin-left:60px;margin-top:40px">TEST</h1></div>
-		<div class="container_16" style="float:left">
-			<article class="grid_16">
-				<div class="item rounded dark">
-					<div id="map_canvas" class="map rounded"></div>
+		
+		<div id="main">
+			<div style="float:left;width:25%"><h1 style="margin-left:60px;margin-top:40px">TEST</h1></div>
+			<div class="container_16" style="float:right;width:75%">
+				<div class="grid_16" style="float:left;width:65%">
+					<div class="item rounded dark">
+						<div id="map_canvas" class="map rounded"></div>
+					</div>
 				</div>
-				<ul style="visibility:hidden">
-					<?php
-						$handle = fopen("users/".$user['Username'].'/'.$selectedDevID.'/'.$selectedDate.'.txt', "r");
-						$line_cnt = 0;
-						if ($handle) {
-							while (($line = fgets($handle)) !== false) {
-								// process the line read.
-								$line = trim($line);
-								$lat_lng_time = explode(" ", $line);
-								$descript = '日期:'.$lat_lng_time[2].' 時間:'.$lat_lng_time[3];
-								echo "<li data-gmapping='{\"id\":\"m_".$line_cnt."\",\"latlng\":{\"lat\":".$lat_lng_time[0].",\"lng\":".$lat_lng_time[1]
-								."},\"descript\":\"".$descript."\"}'></li>";
-								$line_cnt++;
-							}
-							if ($line_cnt == 0) {
-								echo "<h1> Fail to open file</h1>";
-							}
-						} else {
-							echo "<h1> Fail to open file</h1>";
-						}
-						fclose($handle);
-					?>
-				</ul>
-			</article>
+				<div id="datepicker" style="float:right;width:25%;margin-top:40px"></div>
+			</div>
 		</div>
-		<div id="datepicker" style="float:right;width:18%;margin-top:40px"></div>
+		
+		<ul style="visibility:hidden">
+			<?php
+				$handle = fopen("users/".$user['Username'].'/'.$selectedDevID.'/'.$selectedDate.'.txt', "r");
+				$line_cnt = 0;
+				if ($handle) {
+					while (($line = fgets($handle)) !== false) {
+						// process the line read.
+						$line = trim($line);
+						$lat_lng_time = explode(" ", $line);
+						$descript = '日期:'.$lat_lng_time[2].' 時間:'.$lat_lng_time[3];
+						echo "<li data-gmapping='{\"id\":\"m_".$line_cnt."\",\"latlng\":{\"lat\":".$lat_lng_time[0].",\"lng\":".$lat_lng_time[1]
+						."},\"descript\":\"".$descript."\"}'></li>";
+						$line_cnt++;
+					}
+					if ($line_cnt == 0) {
+						echo "<h1> Fail to open file</h1>";
+					}
+				} else {
+					echo "<h1> Fail to open file</h1>";
+				}
+				fclose($handle);
+			?>
+		</ul>
 	</body>
 </html>
