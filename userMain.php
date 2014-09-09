@@ -55,37 +55,6 @@ $selectedDate = "2014-06-15";
 		
 		<script type="text/javascript">
             $(function() { 
-				// show gmap
-				demo.add(function() {
-					$('#map_canvas').gmap({'disableDefaultUI':true, 'callback': function() {
-						var self = this;
-						$("[data-gmapping]").each(function(i,el) {
-							var data = $(el).data('gmapping');
-							self.addMarker({'id': data.id, 'position': new google.maps.LatLng(data.latlng.lat, data.latlng.lng), 'bounds':true, 'icon': "images/small-red.png" }, function(map,marker) {
-								$(el).click(function() {
-									$(marker).triggerEvent('click');
-								});
-							}).click(function() {
-								self.openInfoWindow({ 'content': data.descript }, this);
-							});
-						});						
-					}});
-				}).load();
-				
-				$('.dev_block').click(function() {
-					if (!$(this).is('.selected')) {
-						// change the color of selected dev_block
-						$(this).css({
-							'background' : 'linear-gradient(#EFEFEF, #FFFFFF) repeat scroll 0 0 #000000',
-							'color' : '#000000'
-						}).addClass('selected');
-						
-						// remove "selected" class of all other dev_block if any
-						
-						// select the lastdate shown in the clicked dev_block on calendar, to trigger google loading operation 
-					}
-				}); // end click;
-				
 				// show date picker
 			    $("#datepicker").datepicker({
 					onSelect: function(dateText, inst) {
@@ -98,20 +67,94 @@ $selectedDate = "2014-06-15";
 							xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
 						}
 						
+						// after received datefile.txt, paste
 						xmlhttp.onreadystatechange = function() {
-							if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-								//document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
-								document.getElementById("dev_list").innerHTML = selectDate;
+							if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {		
+								var lines = (xmlhttp.responseText).trim().split('\n');
+								if (lines.length != 0) {
+									// set the map back to visible if there is data
+									$('#map_canvas').css('visibility', 'visible');
+									
+									// insert new li which includes the location information we got from datefile.txt
+									for (var i = 0; i < lines.length; i++) {
+										var latLngTime = lines[i].split(' ');
+										var descript = 'Date: ' + latLngTime[2] + '  Time: ' + latLngTime[3];
+										var newLi = "<li data-gmapping='{\"id\":\"m_" + i + "\",\"latlng\":{\"lat\":" + latLngTime[0] + ",\"lng\":" + latLngTime[1]
+													+ "},\"descript\":\"" + descript + "\"}'></li>";
+										// alert(newLi);                 
+										$('#datetime_panel').append(newLi);
+									}
+	
+									// add small red dot marker (up to 96 dot) to the gmap
+									$('#map_canvas').gmap({'disableDefaultUI':true, 'callback': function() {
+										var self = this;
+										$("[data-gmapping]").each(function(i,el) {
+											var data = $(el).data('gmapping');
+											self.addMarker({'id': data.id, 'position': new google.maps.LatLng(data.latlng.lat, data.latlng.lng), 'bounds':true, 
+											'icon': "images/small-red.png" }, function(map,marker) {
+												$(el).click(function() {
+													$(marker).triggerEvent('click');
+												});
+											}).click(function() {
+												self.openInfoWindow({ 'content': data.descript }, this);
+											});
+										});						
+									}});
+								} 
 							}
 						}
+
+						// get datefile path from selected date, and current selected device(from selected dev_block div)
 						var tmp = dateText.split("/");
 						var selectDate = tmp[2] + '-' + tmp[0] + '-' + tmp[1];
-						// document.getElementById("dev_list").innerHTML = selectDate;
-						var dateFile = "users/" + "<?php echo $user['Username']; ?>" + "/" + selectDate + ".txt";
+						// build the date.txt file name
+						var dateFile = "users/" + "<?php echo $user['Username']; ?>" + "/" + $('.selected').find('.dev_id').html() + "/" + selectDate + ".txt";
+						// add a random GET parameter to the end of the file name, so browser won't cache it
+						dateFile = dateFile + '?nocache=' + (new Date()).getTime();
+
 						xmlhttp.open("GET", dateFile, true);
 						xmlhttp.send();
+						
+						// clear original data in #datetime_panel div
+						$('#datetime_panel').html('');
+						// remove the original content on gmap
+						$('#map_canvas').gmap('destroy');
+						// set the gmap to be invisible, will set it back if there is data by xmlhttp.onreadystatechange
+						$('#map_canvas').css('visibility', 'hidden');
 					}
 				});
+				
+				// change size of the datepicker
+				$('.ui-datepicker').css('font-size', $('.ui-datepicker').width() / 14 + 'px');
+
+				// process dev_block click event 
+				$('.dev_block').click(function() {
+					if (!$(this).is('.selected')) {
+						// remove "selected" class of all other dev_block if any
+						$('.selected').css({
+							'background' : 'linear-gradient(#E4E4E4, #AFAFAF) repeat scroll 0 0 #FFFFFF',
+							'color' : '#000000'
+						}).removeClass('selected');
+						
+						// change the color of selected dev_block, and add 'selected' class to the selected block, so the datepicker can find the selected one.
+						$(this).css({
+							'background' : 'linear-gradient(#EFEFEF, #FFFFFF) repeat scroll 0 0 #000000',
+							'color' : '#000000'
+						}).addClass('selected');
+						
+						// get year/month/day 
+						var tmp = $(this).find('.dev_lasttime').html();
+						tmp = tmp.split(" ");
+						tmp = tmp[0].split("-");
+
+						// select the lastdate shown in the clicked dev_block on calendar, to trigger google loading operation
+						$('#datepicker').datepicker("setDate", new Date(tmp[0],tmp[1] - 1,tmp[2]));
+						$('.ui-datepicker-current-day').trigger("click");
+					}
+				}); // end click;
+				
+				// when html loaded, trigger the click event on the first dev_block
+				$('.dev_block:first').trigger("click");
 			});
         </script>
     </head>
@@ -147,8 +190,8 @@ $selectedDate = "2014-06-15";
 				<?php
 				// if there is device, show the device buttons
 				for($i = 0; $i < $size; ++$i) {
-					echo "<div class='dev_block' style='margin-left:80px;margin-top:15px;width:60%;height:90px;
-					border-radius:5px;color:#222222;border:2px solid #aaaaaa;font-weight:bold;background:linear-gradient(#F4F4F4, #BFBFBF) repeat scroll 0 0 #FFFFFF'>";
+					echo "<div class='dev_block' style='margin-left:auto;margin-right:auto;padding:5px;margin-top:15px;width:55%;height:90px;
+					border-radius:5px;color:#222222;border:1px solid #cccccc;font-weight:bold;background:linear-gradient(#E4E4E4, #AFAFAF) repeat scroll 0 0 #FFFFFF'>";
 					echo "<div class='dev_desc' style='font-size:20px;height:90px;width:5%;vertical-align:middle;display:table-cell;text-align:center'>".$arr_data[$i]['devdescript']."</div>";
 					echo "<div class='dev_id' style='display:none'>".$arr_data[$i]['devid']."</div>";
 					echo "<div class='dev_type' style='display:none'>".$arr_data[$i]['devtype']."</div>";
@@ -161,12 +204,12 @@ $selectedDate = "2014-06-15";
 			<!-- if user has no device, don't show this block -->
 			<div class="container_16" style="float:right;width:75%;<?php if ($size == 0) echo "display:none";?>">
 				<div class="grid_16" style="float:left;width:65%">
-					<div class="item rounded dark">
+					<div id="map_canvas_background" style="border:1px solid #cccccc;border-radius:7px;background-color:#dddddd;">
 						<div id="map_canvas" class="map rounded"></div>
 					</div>
 				</div>
 				
-				<div id="datepicker" style="float:right;width:25%;margin-top:40px;margin-right:40px">
+				<div id="datepicker" style="float:right;width:25%;margin-top:40px;margin-right:35px">
 				</div>
 			</div>
 			
@@ -178,8 +221,9 @@ $selectedDate = "2014-06-15";
 			?>
 		</div>
 		
-		<ul style="display:none">
+		<ul id="datetime_panel" style="display:none">
 			<?php
+			/*
 				$handle = fopen("users/".$user['Username'].'/'.$selectedDevID.'/'.$selectedDate.'.txt', "r");
 				$line_cnt = 0;
 				if ($handle) {
@@ -199,6 +243,7 @@ $selectedDate = "2014-06-15";
 					echo "<h1> Fail to open file</h1>";
 				}
 				fclose($handle);
+			*/
 			?>
 		</ul>
 	</body>
