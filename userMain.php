@@ -69,11 +69,11 @@ $selectedDate = "2014-06-15";
 						
 						// after received datefile.txt, paste
 						xmlhttp.onreadystatechange = function() {
-							if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {		
+							if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 								var lines = (xmlhttp.responseText).trim().split('\n');
 								if (lines.length != 0) {
-									// set the map back to visible if there is data
-									$('#map_canvas').css('visibility', 'visible');
+									// only destroy the map when there is data (if no data, only remove red dot marker but remain the location)
+									$('#map_canvas').gmap('destroy');
 									
 									// insert new li which includes the location information we got from datefile.txt
 									for (var i = 0; i < lines.length; i++) {
@@ -101,7 +101,7 @@ $selectedDate = "2014-06-15";
 										});						
 									}});
 								} 
-							}
+							} 
 						}
 
 						// get datefile path from selected date, and current selected device(from selected dev_block div)
@@ -117,10 +117,8 @@ $selectedDate = "2014-06-15";
 						
 						// clear original data in #datetime_panel div
 						$('#datetime_panel').html('');
-						// remove the original content on gmap
-						$('#map_canvas').gmap('destroy');
-						// set the gmap to be invisible, will set it back if there is data by xmlhttp.onreadystatechange
-						$('#map_canvas').css('visibility', 'hidden');
+						// remove all markers on the map
+						$('#map_canvas').gmap('clear', 'markers');
 					}
 				});
 				
