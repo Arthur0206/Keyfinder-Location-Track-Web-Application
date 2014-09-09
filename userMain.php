@@ -188,9 +188,9 @@ $selectedDate = "2014-06-15";
 				<?php
 				// if there is device, show the device buttons
 				for($i = 0; $i < $size; ++$i) {
-					echo "<div class='dev_block' style='margin-left:auto;margin-right:auto;padding:5px;margin-top:15px;width:55%;height:90px;
+					echo "<div class='dev_block' style='margin-left:auto;margin-right:auto;padding:5px;margin-top:15px;width:55%;height:60px;
 					border-radius:5px;color:#222222;border:1px solid #cccccc;font-weight:bold;background:linear-gradient(#E4E4E4, #AFAFAF) repeat scroll 0 0 #FFFFFF'>";
-					echo "<div class='dev_desc' style='font-size:20px;height:90px;width:5%;vertical-align:middle;display:table-cell;text-align:center'>".$arr_data[$i]['devdescript']."</div>";
+					echo "<div class='dev_desc' style='font-size:18px;height:60px;width:5%;vertical-align:middle;display:table-cell;text-align:center'>".$arr_data[$i]['devdescript']."</div>";
 					echo "<div class='dev_id' style='display:none'>".$arr_data[$i]['devid']."</div>";
 					echo "<div class='dev_type' style='display:none'>".$arr_data[$i]['devtype']."</div>";
 					echo "<div class='dev_lasttime' style='display:none'>".$arr_data[$i]['lasttime']."</div>";

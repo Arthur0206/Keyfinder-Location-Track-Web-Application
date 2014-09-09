@@ -78,7 +78,7 @@ if (isset($_POST['register'])) {
 			</form>
 			<br />
 			<h6>
-				No account? <a href='register.php'>Register!</a>
+				Already has an account? <a href='index.php'>Log in</a>
 			</h6>
 		</div>
 	</body>
