@@ -1,7 +1,9 @@
 <?php
 include "connection.php";
 include "algor.php";
-
+if (!$logged) {
+	die("You can't view your data before login! <a href='index.php'>&larr; Log In</a>");
+}
 // later on should parse dev_list.txt to set the 1st dev as default, and change according to get method (when user select a specific device)
 $selectedDevID = "1"; 
 // later on should parse dev_list.txt to set the last day as default, and change according to get method (when user select a specific date)
@@ -70,24 +72,61 @@ $selectedDate = "2014-06-15";
 					}});
 				}).load();
 				
+				$('.dev_block').click(function() {
+					if (!$(this).is('.selected')) {
+						// change the color of selected dev_block
+						$(this).css({
+							'background' : 'linear-gradient(#EFEFEF, #FFFFFF) repeat scroll 0 0 #000000',
+							'color' : '#000000'
+						}).addClass('selected');
+						
+						// remove "selected" class of all other dev_block if any
+						
+						// select the lastdate shown in the clicked dev_block on calendar, to trigger google loading operation 
+					}
+				}); // end click;
+				
 				// show date picker
-			    $("#datepicker").datepicker();
+			    $("#datepicker").datepicker({
+					onSelect: function(dateText, inst) {
+						var xmlhttp;
+						if (window.XMLHttpRequest) {
+							// code for IE7+, Firefox, Chrome, Opera, Safari
+							xmlhttp = new XMLHttpRequest();
+						} else {
+							// code for IE6, IE5
+							xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+						}
+						
+						xmlhttp.onreadystatechange = function() {
+							if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+								//document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
+								document.getElementById("dev_list").innerHTML = selectDate;
+							}
+						}
+						var tmp = dateText.split("/");
+						var selectDate = tmp[2] + '-' + tmp[0] + '-' + tmp[1];
+						// document.getElementById("dev_list").innerHTML = selectDate;
+						var dateFile = "users/" + "<?php echo $user['Username']; ?>" + "/" + selectDate + ".txt";
+						xmlhttp.open("GET", dateFile, true);
+						xmlhttp.send();
+					}
+				});
 			});
         </script>
     </head>
 
-    <body style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
+    <body style="-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;min-height:425px">
 		<header class="dark" style="min-width:960px">
 			<div id="header_main" style="margin-left:25%">
-				<h1 style='float:left;padding-top:3px'>Sprintron Location Service</h1>
+				<h1 style='float:left;padding-top:3px'>Sprintron Device Service</h1>
 				<!-- add a left padder -->
 				<div style="float:right;width:33%;min-width:200px;height:30px"></div>
 				<?php
 				if ($logged == true) {
 				?>									
 					<a href='./logout.php' style='float:right;font:20px/20px "Arial";padding:7px 24px 0px 0px;color:#FFFFFF'>Logout</a>
-					<li style='float:right;color:#527fc2;font: bold 20px/20px "Arial";padding:8px 24px 0px 0px'> <?php echo $user['Username']; ?> </li>
-
+					<li style='float:right;color:#2895f1;font:bold 20px/20px "Arial";padding:8px 16px 0px 0px'> <?php echo $user['Username']; ?> </li>
 				<?php
 				}
 				?>
@@ -95,18 +134,51 @@ $selectedDate = "2014-06-15";
 		</header>
 		
 		<div id="main">
-			<div style="float:left;width:25%"><h1 style="margin-left:60px;margin-top:40px">TEST</h1></div>
-			<div class="container_16" style="float:right;width:75%">
+			<?php
+			// gets json-data from dev_list.txt file to retrieve device list
+			$arr_data = array();
+			$jsondata = file_get_contents("users/".$user['Username'].'/'."dev_list.txt");
+			$arr_data = json_decode($jsondata, true);
+			$size = count($arr_data);
+			?>
+			
+			<!-- if user has no device, don't show this block -->
+			<div id="dev_list" style="float:left;width:25%;margin-top:30px;<?php if ($size == 0) echo "display:none";?>">
+				<?php
+				// if there is device, show the device buttons
+				for($i = 0; $i < $size; ++$i) {
+					echo "<div class='dev_block' style='margin-left:80px;margin-top:15px;width:60%;height:90px;
+					border-radius:5px;color:#222222;border:2px solid #aaaaaa;font-weight:bold;background:linear-gradient(#F4F4F4, #BFBFBF) repeat scroll 0 0 #FFFFFF'>";
+					echo "<div class='dev_desc' style='font-size:20px;height:90px;width:5%;vertical-align:middle;display:table-cell;text-align:center'>".$arr_data[$i]['devdescript']."</div>";
+					echo "<div class='dev_id' style='display:none'>".$arr_data[$i]['devid']."</div>";
+					echo "<div class='dev_type' style='display:none'>".$arr_data[$i]['devtype']."</div>";
+					echo "<div class='dev_lasttime' style='display:none'>".$arr_data[$i]['lasttime']."</div>";
+					echo "</div>";
+				}
+				?>
+			</div>
+			
+			<!-- if user has no device, don't show this block -->
+			<div class="container_16" style="float:right;width:75%;<?php if ($size == 0) echo "display:none";?>">
 				<div class="grid_16" style="float:left;width:65%">
 					<div class="item rounded dark">
 						<div id="map_canvas" class="map rounded"></div>
 					</div>
 				</div>
-				<div id="datepicker" style="float:right;width:25%;margin-top:40px"></div>
+				
+				<div id="datepicker" style="float:right;width:25%;margin-top:40px;margin-right:40px">
+				</div>
 			</div>
+			
+			<!-- if user has no device, show this block -->
+			<?php
+				if ($size == 0) {
+					echo "<h1 style='margin-top:300px;text-align:center;font-size:23px'>You have no device.</h1>";
+				}
+			?>
 		</div>
 		
-		<ul style="visibility:hidden">
+		<ul style="display:none">
 			<?php
 				$handle = fopen("users/".$user['Username'].'/'.$selectedDevID.'/'.$selectedDate.'.txt', "r");
 				$line_cnt = 0;
