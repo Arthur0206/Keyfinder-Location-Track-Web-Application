@@ -81,12 +81,12 @@ $selectedDate = "2014-06-15";
 										var descript = 'Date: ' + latLngTime[2] + '  Time: ' + latLngTime[3];
 										var newLi = "<li data-gmapping='{\"id\":\"m_" + i + "\",\"latlng\":{\"lat\":" + latLngTime[0] + ",\"lng\":" + latLngTime[1]
 													+ "},\"descript\":\"" + descript + "\"}'></li>";
-										// alert(newLi);                 
+            
 										$('#datetime_panel').append(newLi);
 									}
 	
 									// add small red dot marker (up to 96 dot) to the gmap
-									$('#map_canvas').gmap({'disableDefaultUI':true, 'callback': function() {
+									$('#map_canvas').gmap({'disableDefaultUI':false, 'callback': function() {
 										var self = this;
 										$("[data-gmapping]").each(function(i,el) {
 											var data = $(el).data('gmapping');
@@ -221,30 +221,7 @@ $selectedDate = "2014-06-15";
 			?>
 		</div>
 		
-		<ul id="datetime_panel" style="display:none">
-			<?php
-			/*
-				$handle = fopen("users/".$user['Username'].'/'.$selectedDevID.'/'.$selectedDate.'.txt', "r");
-				$line_cnt = 0;
-				if ($handle) {
-					while (($line = fgets($handle)) !== false) {
-						// process the line read.
-						$line = trim($line);
-						$lat_lng_time = explode(" ", $line);
-						$descript = '日期:'.$lat_lng_time[2].' 時間:'.$lat_lng_time[3];
-						echo "<li data-gmapping='{\"id\":\"m_".$line_cnt."\",\"latlng\":{\"lat\":".$lat_lng_time[0].",\"lng\":".$lat_lng_time[1]
-						."},\"descript\":\"".$descript."\"}'></li>";
-						$line_cnt++;
-					}
-					if ($line_cnt == 0) {
-						echo "<h1> Fail to open file</h1>";
-					}
-				} else {
-					echo "<h1> Fail to open file</h1>";
-				}
-				fclose($handle);
-			*/
-			?>
-		</ul>
+		<!-- use to contain location data entries -->
+		<ul id="datetime_panel" style="display:none"></ul>
 	</body>
 </html>
