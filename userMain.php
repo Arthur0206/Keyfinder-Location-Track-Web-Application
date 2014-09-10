@@ -214,7 +214,7 @@ $selectedDate = "2014-06-15";
 			<!-- if user has no device, show this block -->
 			<?php
 				if ($size == 0) {
-					echo "<h1 style='margin-top:300px;text-align:center;font-size:23px'>You have no device.</h1>";
+					echo "<h1 style='margin-top:19%;text-align:center;font-size:23px'>You have no device.</h1>";
 				}
 			?>
 		</div>

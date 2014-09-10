@@ -39,8 +39,11 @@ if (isset($_POST['register'])) {
 
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
+	<head>
+		<link type="text/css" rel="stylesheet" href="css/style.css" />
+	</head>
 	<body style='font-family: verdana, sans-serif;'>
-		<div style='width: 80%; padding: 10px; border: 1px solid #e3e3e3; background-color: #fff; color: #000; margin-left: 10'>
+		<div style='margin-left:auto;margin-right:auto;width:320px;margin-top:11%;font-size:15px'>
 			<h1>Register</h1>
 			<br />
 			<form action='' method='post'>
@@ -71,7 +74,7 @@ if (isset($_POST['register'])) {
 					</tr>
 					<tr>
 						<td>
-							<input type='submit' value='Register' name='register' />
+							<input type='submit' value='Register' name='register' style="margin-top:10px;font-size:16px;font-weight:bold;padding:6px 10px 6px 10px"/>
 						</td>
 					</tr>
 				</table>
