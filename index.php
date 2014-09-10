@@ -39,7 +39,7 @@ if ($logged == true) {
 		<link type="text/css" rel="stylesheet" href="css/style.css" />
 	</head>
 	<body style='font-family: verdana, sans-serif;'>
-		<div style='margin-left:auto;margin-right:auto;width:320px;margin-top:12%;font-size:15px'>
+		<div style='margin-left:auto;margin-right:auto;width:320px;margin-top:12%;font-size:17px'>
 			<h1>Login</h1>
 			<br />
 			<form action='' method='post'>

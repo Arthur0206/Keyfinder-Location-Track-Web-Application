@@ -43,7 +43,7 @@ if (isset($_POST['register'])) {
 		<link type="text/css" rel="stylesheet" href="css/style.css" />
 	</head>
 	<body style='font-family: verdana, sans-serif;'>
-		<div style='margin-left:auto;margin-right:auto;width:320px;margin-top:11%;font-size:15px'>
+		<div style='margin-left:auto;margin-right:auto;width:330px;margin-top:11%;font-size:17px'>
 			<h1>Register</h1>
 			<br />
 			<form action='' method='post'>
