@@ -1,5 +1,9 @@
 <?php
-include "connection.php";
+// include db connect class
+require_once 'db_connect.php';
+// connecting to db
+$db = new DB_CONNECT();
+
 include "algor.php";
 if (!$logged) {
 	die("You can't view your data before login! <a href='index.php'>&larr; Log In</a>");

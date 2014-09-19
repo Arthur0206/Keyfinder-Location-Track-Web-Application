@@ -1,6 +1,9 @@
 <?php
-$connection = mysql_connect("localhost", "root", "sosoman1984") or die("Couldn't connect to the server!");
-mysql_select_db("location_service", $connection) or die("Couldn't connect to the database!");
+
+// include db connect class
+require_once 'db_connect.php';
+// connecting to db
+$db = new DB_CONNECT();
 
 error_reporting(0);
 
@@ -10,8 +13,8 @@ if (isset($_POST['register'])) {
 		$password = mysql_real_escape_string(hash("sha512", $_POST['password']));
 		$email = mysql_real_escape_string(strip_tags($_POST['email']));
 
-		$check = mysql_fetch_array(mysql_query("SELECT * FROM `user` WHERE `Username`='$username'"));
-		if ($check != '0') {
+		$check = mysql_fetch_array(mysql_query("SELECT * FROM `UserTable` WHERE `Username`='$username'"));
+		if (mysql_num_rows($check) != 0) {
 			die("That username <i>$username already exist! Please try another one. <a href='register.php'>&larr; Back</a>");
 		}
 		if (!ctype_alnum($username)) {
@@ -21,7 +24,7 @@ if (isset($_POST['register'])) {
 			die("Username must not contain more than 20 characters!  <a href='register.php'>&larr; Back</a>");
 		}
 		$salt = hash("sha512", rand() . rand() . rand());
-		mysql_query("INSERT INTO `user` (`Username`, `Password`, `Email`, `Salt`) VALUES ('$username', '$password', '$email', '$salt')");
+		mysql_query("INSERT INTO `UserTable` (`Username`, `Password`, `Email`, `Salt`) VALUES ('$username', '$password', '$email', '$salt')");
 		setcookie("c_user", hash("sha512", $username), time() + 24 * 60 * 60, "/");
 		setcookie("c_salt", $salt, time() + 24 * 60 * 60, "/");
 		

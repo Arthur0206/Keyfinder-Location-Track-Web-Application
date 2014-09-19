@@ -1,5 +1,9 @@
 <?php
-include "connection.php";
+
+// include db connect class
+require_once 'db_connect.php';
+// connecting to db
+$db = new DB_CONNECT();
 
 error_reporting(0);
 
@@ -7,7 +11,7 @@ if (isset($_POST['login'])) {
 	if (isset($_POST['username']) && isset($_POST['password'])) {
 		$username = mysql_real_escape_string($_POST['username']);
 		$password = mysql_real_escape_string(hash("sha512", $_POST['password']));
-		$user = mysql_fetch_array(mysql_query("SELECT * FROM `user` WHERE `Username`='$username'"));
+		$user = mysql_fetch_array(mysql_query("SELECT * FROM UserTable WHERE Username='$username'"));
 		if ($user == '0') {
 			die("The username <i>$username</i> doesn't exist! <a href='index.php'>&larr; Back</a>");
 		}
@@ -19,7 +23,7 @@ if (isset($_POST['login'])) {
 		setcookie("c_user", hash("sha512", $username), time() + 24 * 60 * 60, "/");
 		setcookie("c_salt", $salt, time() + 24 * 60 * 60, "/");
 		$userID = $user['ID'];
-		mysql_query("UPDATE `user` SET `Salt`='$salt' WHERE `ID`='$userID'");
+		mysql_query("UPDATE `UserTable` SET `Salt`='$salt' WHERE `ID`='$userID'");
         header("Location: ./userMain.php");
 	}
 }
