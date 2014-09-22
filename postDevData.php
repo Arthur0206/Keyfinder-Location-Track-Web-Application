@@ -1,6 +1,9 @@
 <?php
-include "connection.php";
-error_reporting(0);
+
+// include db connect class
+require_once 'db_connect.php';
+// connecting to db
+$db = new DB_CONNECT();
 
 function logSysErrMsg($msg) {
 	// print error message and _POST[] to syslog/error.txt
@@ -10,10 +13,10 @@ function logSysErrMsg($msg) {
 }
 
 function clearPostRedirectDie() {
-	// clear $_POST, redirect and die
-	unset($_POST);
+    // clear $_POST, redirect and die
+    unset($_POST);
     header("Location: ./postDevData.php");
-	die;
+    die;
 }
 
 function isValidDateTime($dateTime)
@@ -46,7 +49,7 @@ function checkAndCreateFile($dirPath, $fileName) {
 if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devid']) && isset($_POST['opcode'])) {
 	$username = mysql_real_escape_string($_POST['username']);
 	$password = mysql_real_escape_string(hash("sha512", $_POST['password']));
-	$user = mysql_fetch_array(mysql_query("SELECT * FROM `user` WHERE `Username`='$username'"));
+	$user = mysql_fetch_array(mysql_query("SELECT * FROM `UserTable` WHERE `Username`='$username'"));
 	// check user name
 	if ($user == '0') {
 		logSysErrMsg("postDevData.php - username doesn't exist");
@@ -99,13 +102,14 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 		// appends the array with new form data
 		$arr_data[] = $formdata;
 		// encodes the array into a string in JSON format (JSON_PRETTY_PRINT - uses whitespace in json-string, for human readable)
-		$jsondata = json_encode($arr_data, JSON_PRETTY_PRINT);
-		
-		// saves the json string in "dev_list.txt"
+		$jsondata = json_encode($arr_data);
+                // saves the json string in "dev_list.txt"
 		if (file_put_contents("users/".$_POST['username']."/dev_list.txt", $jsondata)) {
+                    echo $jsondata;
 			echo 'Data successfully saved';
 		} else {
-			// outputs error message if data cannot be saved
+                    // outputs error message if data cannot be saved
+                    echo $jsondata;
 			logSysErrMsg("postDevData.php - can't add new dev to dev_list.txt");
 			clearPostRedirectDie();
 		}
@@ -162,10 +166,12 @@ if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['devi
 		// update lasttime in dev_list.txt
 		$arr_data[$idx]['lasttime'] = $_POST['datetime'];
 		// encodes the array into a string in JSON format, and saves the json string in "dev_list.txt"
-		$jsondata = json_encode($arr_data, JSON_PRETTY_PRINT);
+		$jsondata = json_encode($arr_data);
 		if (file_put_contents("users/".$_POST['username']."/dev_list.txt", $jsondata)) {
+                    echo $jsondata;
 			echo 'Data successfully saved';
 		} else {
+                    echo $jsondata;
 			// outputs error message if data cannot be saved
 			logSysErrMsg("postDevData.php - can't add new dev to dev_list.txt");
 			clearPostRedirectDie();
